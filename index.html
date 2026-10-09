@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Inversiones">
+<title>Inversiones</title>
+<meta name="theme-color" content="#2F5D8C">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF1F4; --surface:#FFFFFF; --ink:#132235; --muted:#5D6B78; --line:#D6DDE3;
+  --accent:#2F5D8C; --accent-soft:#DCE6F1; --up:#24804F; --down:#B9442F; --crypto:#B7832F;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1822; --surface:#172331; --ink:#E6EDF3; --muted:#93A2B0; --line:#2A3949;
+    --accent:#7FAEDB; --accent-soft:#1E3247; --up:#6FC59A; --down:#E6826C; --crypto:#E0B062;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1822; --surface:#172331; --ink:#E6EDF3; --muted:#93A2B0; --line:#2A3949;
+  --accent:#7FAEDB; --accent-soft:#1E3247; --up:#6FC59A; --down:#E6826C; --crypto:#E0B062;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);
+  font-family:"Figtree",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:560px;margin:0 auto;padding:12px 18px 120px}
+.top{display:flex;justify-content:space-between;align-items:center;margin:6px 0 16px}
+.top h1{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;margin:0}
+.fx{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-weight:600;font-size:.88rem}
+.fx small{color:var(--muted);font-weight:500;margin-right:4px}
+
+.hero{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:20px}
+.hero .lbl{color:var(--muted);font-size:.9rem}
+.hero .big{font-size:2.5rem;font-weight:800;letter-spacing:-.035em;line-height:1.1;margin:2px 0 6px}
+.gain{font-weight:700;font-size:1.05rem}
+.gain.up{color:var(--up)} .gain.down{color:var(--down)}
+.gain small{font-weight:600;opacity:.85;margin-left:6px}
+.alloc{display:flex;height:12px;border-radius:6px;overflow:hidden;margin:18px 0 10px;background:var(--line)}
+.alloc span{height:100%}
+.legend{display:flex;justify-content:space-between;gap:12px;font-size:.85rem;color:var(--muted)}
+.legend b{display:block;color:var(--ink);font-size:1rem}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
+
+.seg{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:3px;margin:24px 0 12px}
+.seg button{flex:1;border:0;background:none;padding:9px;border-radius:11px;font-weight:600;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.sub{display:flex;justify-content:space-between;color:var(--muted);font-size:.85rem;margin:0 4px 8px}
+.panel{background:var(--surface);border-radius:18px;border:1px solid var(--line);padding:4px 16px}
+.pos{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:12px 0;border-bottom:1px solid var(--line);width:100%;text-align:left;border-left:0;border-right:0;border-top:0;background:none}
+.pos:last-child{border-bottom:0}
+.pos b{font-weight:700}
+.pos .r{text-align:right;font-weight:700}
+.pos small{color:var(--muted)}
+.pos .g{text-align:right;font-size:.85rem;font-weight:600}
+.up{color:var(--up)} .down{color:var(--down)}
+.mov{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.mov:last-child{border-bottom:0}
+.mov .t{flex:1;min-width:0}
+.mov .t b{display:block;font-weight:600}
+.mov .t small{color:var(--muted)}
+.mov .a{font-weight:700;white-space:nowrap}
+.mov .del{border:0;background:none;color:var(--muted);font-size:1.1rem;padding:6px}
+.empty{color:var(--muted);text-align:center;padding:28px 10px}
+.note{font-size:.82rem;color:var(--muted);margin:10px 4px 0}
+.banner{background:var(--accent-soft);border-radius:14px;padding:12px 14px;font-size:.88rem;margin-bottom:14px}
+
+.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);
+  padding:8px 18px calc(8px + env(safe-area-inset-bottom,0px));display:flex;justify-content:space-around;align-items:center;z-index:5}
+.tabs button{border:0;background:none;color:var(--muted);font-weight:600;font-size:.82rem;display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 14px}
+.tabs button[aria-current="true"]{color:var(--accent)}
+.tabs svg{width:24px;height:24px}
+.tabs .add{width:58px;height:58px;border-radius:50%;background:var(--accent);color:#fff;font-size:2rem;line-height:1;padding:0;margin-top:-26px;box-shadow:0 6px 18px rgba(47,93,140,.35);justify-content:center}
+
+.sheet-bg{position:fixed;inset:0;background:rgba(10,20,30,.45);z-index:10;display:none}
+.sheet-bg.open{display:block}
+.sheet{position:fixed;left:0;right:0;bottom:0;max-width:560px;margin:0 auto;background:var(--bg);border-radius:24px 24px 0 0;
+  padding:10px 18px calc(18px + env(safe-area-inset-bottom,0px));z-index:11;transform:translateY(105%);transition:transform .28s ease;max-height:92vh;overflow-y:auto}
+.sheet.open{transform:none}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 12px}
+.sheet h3{margin:4px 0 4px;font-size:1.2rem}
+label.f{display:block;font-size:.85rem;color:var(--muted);font-weight:600;margin:14px 0 6px}
+.field{width:100%;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--surface);appearance:none;-webkit-appearance:none}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.calc{background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:12px 14px;margin-top:14px;font-size:.92rem}
+.calc b{font-weight:700}
+.primary{width:100%;margin-top:20px;padding:15px;border:0;border-radius:16px;background:var(--accent);color:#fff;font-weight:700;font-size:1.05rem}
+.primary:disabled{opacity:.45}
+.toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);
+  padding:10px 18px;border-radius:999px;font-weight:600;font-size:.9rem;opacity:0;transition:opacity .2s;z-index:20;pointer-events:none}
+.toast.show{opacity:1}
+.kv{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:.95rem}
+.kv span:first-child{color:var(--muted)}
+.pchart{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 8px 8px;margin:12px 0 6px}
+.pchart svg{width:100%;height:auto;display:block}
+.pchart text{fill:var(--muted);font-size:10px;font-family:inherit}
+.pleg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.78rem;color:var(--muted);padding:6px 8px 0}
+.pleg i{display:inline-block;width:14px;height:0;border-top:2px solid;vertical-align:middle;margin-right:5px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="banner"></div>
+  <header class="top">
+    <h1>Inversiones</h1>
+    <div style="display:flex;gap:8px"><button class="fx" id="fxBtn"><small>Dólar</small><span id="fxVal">—</span></button><button class="fx" id="menuBtn" aria-label="Datos">⋯</button></div>
+  </header>
+
+  <main id="view-home">
+    <section class="hero" aria-label="Resumen del portafolio">
+      <div class="lbl">Valor actual del portafolio</div>
+      <div class="big" id="hTotal">$0</div>
+      <div class="gain" id="hGain"></div>
+      <div class="alloc" aria-hidden="true"><span id="aS" style="background:var(--accent)"></span><span id="aC" style="background:var(--crypto)"></span></div>
+      <div class="legend">
+        <div><span class="dot" style="background:var(--accent)"></span>Acciones<b id="lS">$0</b></div>
+        <div style="text-align:right"><span class="dot" style="background:var(--crypto)"></span>Cripto<b id="lC">$0</b></div>
+      </div>
+    </section>
+
+    <div class="seg" role="group" aria-label="Portafolio" id="pSeg">
+      <button data-k="s" aria-pressed="true">Acciones</button>
+      <button data-k="c" aria-pressed="false">Cripto</button>
+    </div>
+    <div class="sub" id="pSub"></div>
+    <div class="panel" id="positions"></div>
+    <p class="note" id="pNote"></p>
+  </main>
+
+  <main id="view-hist" hidden>
+    <div class="seg" role="group" aria-label="Tipo de movimiento" id="hSeg">
+      <button data-k="s" aria-pressed="true">Acciones</button>
+      <button data-k="d" aria-pressed="false">Depósitos</button>
+      <button data-k="c" aria-pressed="false">Cripto</button>
+    </div>
+    <div class="panel" id="hist"></div>
+  </main>
+</div>
+
+<nav class="tabs">
+  <button id="tHome" aria-current="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg>Portafolio</button>
+  <button class="add" id="tAdd" aria-label="Registrar movimiento">+</button>
+  <button id="tHist" aria-current="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Historial</button>
+</nav>
+
+<div class="sheet-bg" id="bg"></div>
+<section class="sheet" id="sheet" role="dialog"><div class="grab"></div><div id="sheetBody"></div></section>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+const CLP=new Intl.NumberFormat('es-CL',{style:'currency',currency:'CLP',maximumFractionDigits:0});
+const USD=new Intl.NumberFormat('es-CL',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2});
+const fc=n=>CLP.format(Math.round(n||0)), fu=n=>USD.format(n||0).replace('US$','US$ ');
+const pct=n=>(n>=0?'+':'')+(n*100).toFixed(1).replace('.',',')+'%';
+const num=(n,d=4)=>Number(n||0).toLocaleString('es-CL',{maximumFractionDigits:d});
+const parse=s=>{s=String(s||'').trim().replace(/\s/g,'');if(!s)return 0;
+  // accept 1.234.567 or 1234,56 or 1234.56
+  if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');else if((s.match(/\./g)||[]).length>1)s=s.replace(/\./g,'');
+  const n=parseFloat(s);return isFinite(n)?n:0};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const title=s=>String(s||'').toLowerCase().replace(/(^|\s)\S/g,c=>c.toUpperCase());
+const fdate=s=>{if(!s)return 'Sin fecha';const[y,m,d]=s.split('-');return d+'-'+m+'-'+y};
+const today=()=>new Date().toISOString().slice(0,10);
+const uid36=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+
+let S={stocks:{buys:[]},deposits:{items:[]},crypto:{buys:[]},prices:{usd:950,venta:0.015,stocks:{},crypto:{},nombres:{}}};
+let store=null, pTab='s', hTab='s';
+
+/* ---------- storage (solo en este teléfono) ---------- */
+const LS='inversiones-app-v1';
+try{const l=JSON.parse(localStorage.getItem(LS)||'null');if(l)S=Object.assign(S,l)}catch(e){}
+function save(){try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){toast('No se pudo guardar en el teléfono')}}
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+function init(){
+  render();
+  if(!(S.stocks.buys||[]).length&&!(S.crypto.buys||[]).length)
+    $('#banner').innerHTML='<div class="banner">Tu app está vacía. Toca <b>⋯</b> arriba y luego <b>Importar respaldo</b> para cargar tus datos.</div>';
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+/* ---------- calculations ---------- */
+function calc(){
+  const P=S.prices, usd=+P.usd||0, venta=+P.venta||0;
+  const st={};(S.stocks.buys||[]).forEach(b=>{const r=st[b.sigla]||(st[b.sigla]={sigla:b.sigla,acc:0,inv:0});r.acc+=+b.acc||0;r.inv+=+b.usd||0});
+  const sRows=Object.values(st).map(r=>{r.precio=+P.stocks[r.sigla]||0;r.valor=r.acc*r.precio;r.gan=r.valor-r.inv;r.pct=r.inv?r.gan/r.inv:0;r.costo=r.acc?r.inv/r.acc:0;return r}).sort((a,b)=>b.valor-a.valor);
+  const sInv=sRows.reduce((s,r)=>s+r.inv,0), sVal=sRows.reduce((s,r)=>s+r.valor,0);
+  const depCLP=(S.deposits.items||[]).reduce((s,d)=>s+(+d.clp||0),0);
+  const sValCLP=sVal*usd;
+  const cr={},saleG={};let realized=0;
+  const ev=[...(S.crypto.buys||[]).map(b=>({k:'b',f:b.fecha||'',x:b})),...(S.crypto.sales||[]).map(v=>({k:'v',f:v.fecha||'',x:v}))].sort((a,b)=>a.f.localeCompare(b.f)||(a.k===b.k?0:a.k==='b'?-1:1));
+  ev.forEach(e=>{const x=e.x,r=cr[x.sigla]||(cr[x.sigla]={sigla:x.sigla,unid:0,inv:0});
+    if(e.k==='b'){r.unid+=+x.unid||0;r.inv+=+x.inv||0}
+    else{const u=Math.min(+x.unid||0,r.unid),c=r.unid?r.inv/r.unid*u:0,g=(+x.neto||0)-c;saleG[x.id]=g;realized+=g;r.unid-=u;r.inv-=c}});
+  const cRows=Object.values(cr).filter(r=>r.unid>1e-12).map(r=>{r.precio=+P.crypto[r.sigla]||0;r.valor=r.unid*r.precio*(1-venta);r.gan=r.valor-r.inv;r.pct=r.inv?r.gan/r.inv:0;r.costo=r.unid?r.inv/r.unid:0;return r}).sort((a,b)=>b.valor-a.valor);
+  const cInv=cRows.reduce((s,r)=>s+r.inv,0), cVal=cRows.reduce((s,r)=>s+r.valor,0);
+  return {realized,saleG,usd,venta,sRows,sInv,sVal,depCLP,sValCLP,cRows,cInv,cVal,totInv:depCLP+cInv,totVal:sValCLP+cVal};
+}
+
+/* ---------- render ---------- */
+function render(){
+  const C=calc();
+  $('#fxVal').textContent=fc(C.usd);
+  $('#hTotal').textContent=fc(C.totVal);
+  const g=C.totVal-C.totInv, gp=C.totInv?g/C.totInv:0;
+  const h=$('#hGain');h.className='gain '+(g>=0?'up':'down');
+  h.innerHTML=(g>=0?'+':'−')+fc(Math.abs(g))+'<small>'+pct(gp)+' sobre '+fc(C.totInv)+' invertidos</small>';
+  const t=C.totVal||1;$('#aS').style.width=(C.sValCLP/t*100)+'%';$('#aC').style.width=(C.cVal/t*100)+'%';
+  $('#lS').textContent=fc(C.sValCLP);$('#lC').textContent=fc(C.cVal);
+
+  if(pTab==='s'){
+    const gu=C.sVal-C.sInv, gc=C.sValCLP-C.depCLP;
+    $('#pSub').innerHTML=`<span>Valor ${fu(C.sVal)}</span><span class="${gu>=0?'up':'down'}">${gu>=0?'+':'−'}${fu(Math.abs(gu))} (${pct(C.sInv?gu/C.sInv:0)})</span>`;
+    $('#positions').innerHTML=C.sRows.length?C.sRows.map(r=>`<button class="pos" data-t="s" data-s="${esc(r.sigla)}"><span><b>${esc(r.sigla)}</b> <small>${esc(title(S.prices.nombres?.[r.sigla]||''))}</small></span><span class="r">${fu(r.valor)}</span><small>${num(r.acc)} acc · ${fu(r.precio)}</small><span class="g ${r.gan>=0?'up':'down'}">${pct(r.pct)}</span></button>`).join(''):'<div class="empty">Aún no tienes acciones. Toca + para registrar una compra.</div>';
+    $('#pNote').innerHTML=`En pesos: depositaste ${fc(C.depCLP)} y hoy valen ${fc(C.sValCLP)} (<span class="${gc>=0?'up':'down'}">${gc>=0?'+':'−'}${fc(Math.abs(gc))}</span>). Toca una acción para actualizar su precio.`;
+  }else{
+    const gc=C.cVal-C.cInv;
+    $('#pSub').innerHTML=`<span>Valor ${fc(C.cVal)}</span><span class="${gc>=0?'up':'down'}">${gc>=0?'+':'−'}${fc(Math.abs(gc))} (${pct(C.cInv?gc/C.cInv:0)})</span>`;
+    $('#positions').innerHTML=C.cRows.length?C.cRows.map(r=>`<button class="pos" data-t="c" data-s="${esc(r.sigla)}"><span><b>${esc(r.sigla)}</b></span><span class="r">${fc(r.valor)}</span><small>${num(r.unid,6)} · ${fc(r.precio)}</small><span class="g ${r.gan>=0?'up':'down'}">${pct(r.pct)}</span></button>`).join(''):'<div class="empty">Aún no tienes cripto. Toca + para registrar una compra.</div>';
+    $('#pNote').innerHTML=(C.realized?`Ganancia ya realizada por ventas: <b class="${C.realized>=0?'up':'down'}">${C.realized>=0?'+':'−'}${fc(Math.abs(C.realized))}</b>. `:'')+`El valor descuenta ${(C.venta*100).toFixed(1).replace('.',',')}% de comisión de venta, como en tu planilla. Toca una moneda para actualizar su precio.`;
+  }
+  renderHist();
+}
+function renderHist(){
+  let rows=[];
+  if(hTab==='s')rows=[...(S.stocks.buys||[])].sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||'')).map(b=>[b.id,`${esc(b.sigla)} · ${num(b.acc)} acc`,`${fdate(b.fecha)} · a ${fu(b.precio)}`,fu(b.usd)]);
+  if(hTab==='d')rows=[...(S.deposits.items||[])].sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||'')).map(b=>[b.id,`${fu(b.clp/b.tc)}`,`${fdate(b.fecha)} · dólar ${fc(b.tc)}`,fc(b.clp)]);
+  if(hTab==='c'){const G=calc().saleG;rows=[...(S.crypto.buys||[]).map(b=>({...b,_t:'b'})),...(S.crypto.sales||[]).map(v=>({...v,_t:'v'}))].sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||'')).map(b=>{if(b._t==='b')return [b.id,`${esc(b.sigla)} · ${num(b.unid,6)}`,`${fdate(b.fecha)} · ${esc(title(b.lugar))}`,fc(b.inv)];const g=G[b.id]||0;return [b.id,`Venta ${esc(b.sigla)} · ${num(b.unid,6)}`,`${fdate(b.fecha)} · ganancia <span class="${g>=0?'up':'down'}">${g>=0?'+':'−'}${fc(Math.abs(g))}</span>`,'+'+fc(b.neto)]})}
+  $('#hist').innerHTML=rows.length?rows.map(r=>`<div class="mov"><div class="t"><b>${r[1]}</b><small>${r[2]}</small></div><span class="a">${r[3]}</span><button class="del" data-id="${esc(r[0])}" aria-label="Eliminar">✕</button></div>`).join(''):'<div class="empty">Sin movimientos.</div>';
+}
+
+/* ---------- nav ---------- */
+function segs(sel,cb){document.querySelectorAll(sel+' button').forEach(b=>b.onclick=()=>{document.querySelectorAll(sel+' button').forEach(o=>o.setAttribute('aria-pressed',o===b));cb(b.dataset.k)})}
+segs('#pSeg',k=>{pTab=k;render()}); segs('#hSeg',k=>{hTab=k;renderHist()});
+function tab(home){$('#view-home').hidden=!home;$('#view-hist').hidden=home;$('#tHome').setAttribute('aria-current',home);$('#tHist').setAttribute('aria-current',!home)}
+$('#tHome').onclick=()=>tab(true);$('#tHist').onclick=()=>tab(false);
+$('#hist').onclick=e=>{const b=e.target.closest('.del');if(!b)return;const id=b.dataset.id;
+  const key=hTab==='s'?'stocks':hTab==='d'?'deposits':'crypto', arr=hTab==='d'?'items':'buys';
+  if(!confirm('¿Eliminar este movimiento?'))return;
+  S[key][arr]=S[key][arr].filter(x=>x.id!==id);if(key==='crypto')S.crypto.sales=(S.crypto.sales||[]).filter(x=>x.id!==id);save(key);render();toast('Eliminado')};
+
+/* ---------- sheets ---------- */
+let tt;function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('show'),2200)}
+function open(html,bind){$('#sheetBody').innerHTML=html;bind&&bind();$('#bg').classList.add('open');$('#sheet').classList.add('open')}
+function close(){$('#bg').classList.remove('open');$('#sheet').classList.remove('open')}
+$('#bg').onclick=close;
+
+// dollar rate
+$('#fxBtn').onclick=()=>open(`<h3>Valor del dólar</h3><p class="note" style="margin:0">Se usa para pasar tus acciones a pesos.</p>
+  <label class="f" for="xUsd">Dólar en pesos</label><input class="field" id="xUsd" inputmode="decimal" value="${num(S.prices.usd,2)}">
+  <button class="primary" id="xOk">Guardar dólar</button>`,()=>{$('#xOk').onclick=()=>{const v=parse($('#xUsd').value);if(!v)return;S.prices.usd=v;S.prices.actualizado=today();save('prices');close();render();toast('Dólar actualizado')}});
+
+// position detail
+$('#positions').onclick=e=>{const b=e.target.closest('.pos');if(!b)return;const t=b.dataset.t,s=b.dataset.s,C=calc();
+  const r=(t==='s'?C.sRows:C.cRows).find(x=>x.sigla===s);if(!r)return;
+  const isS=t==='s',f=isS?fu:fc;
+  open(`<h3>${esc(s)} <small style="color:var(--muted);font-weight:500">${esc(title(isS?S.prices.nombres?.[s]||'':''))}</small></h3>
+  ${chartFor(t,s,r.precio)}
+  <div class="kv"><span>${isS?'Acciones':'Unidades'}</span><span>${num(isS?r.acc:r.unid,6)}</span></div>
+  <div class="kv"><span>Invertido</span><span>${f(r.inv)}</span></div>
+  <div class="kv"><span>Costo promedio</span><span>${f(r.costo)}</span></div>
+  <div class="kv"><span>Valor actual</span><span>${f(r.valor)}</span></div>
+  <div class="kv"><span>Ganancia</span><span class="${r.gan>=0?'up':'down'}">${r.gan>=0?'+':'−'}${f(Math.abs(r.gan))} (${pct(r.pct)})</span></div>
+  <label class="f" for="xP">Precio actual ${isS?'(US$)':'(CLP)'}</label><input class="field" id="xP" inputmode="decimal" value="${num(r.precio,4)}">
+  <button class="primary" id="xOk">Actualizar precio</button>`,()=>{$('#xOk').onclick=()=>{const v=parse($('#xP').value);if(!v)return;
+    (isS?S.prices.stocks:S.prices.crypto)[s]=v;S.prices.actualizado=today();save('prices');close();render();toast('Precio de '+s+' actualizado')}});
+};
+
+// purchase price chart
+function chartFor(t,s,cur){
+  const isS=t==='s';
+  const buys=((isS?S.stocks.buys:S.crypto.buys)||[]).filter(b=>b.sigla===s&&b.fecha).sort((a,b)=>a.fecha.localeCompare(b.fecha));
+  if(!buys.length)return '<p class="note">No hay compras con fecha para graficar (solo una posición inicial).</p>';
+  let q=0,inv=0;
+  const pts=buys.map(b=>{const u=+(isS?b.acc:b.unid)||0;q+=u;inv+=+(isS?b.usd:b.inv)||0;return{d:Date.parse(b.fecha),p:+b.precio,avg:q?inv/q:+b.precio,f:b.fecha}});
+  let d0=pts[0].d,d1=pts[pts.length-1].d;if(d0===d1){d0-=864e5*15;d1+=864e5*15}
+  const vals=[...pts.map(p=>p.p),...pts.map(p=>p.avg)];if(cur)vals.push(cur);
+  let lo=Math.min(...vals),hi=Math.max(...vals);const pad=(hi-lo)*.1||hi*.05||1;lo-=pad;hi+=pad;
+  const W=340,H=180,L=46,R=8,T=8,B=22,iw=W-L-R,ih=H-T-B;
+  const X=d=>L+(d-d0)/(d1-d0)*iw,Y=v=>T+(1-(v-lo)/(hi-lo))*ih;
+  const CMP=new Intl.NumberFormat('es-CL',{notation:'compact',maximumFractionDigits:1});
+  const yl=v=>isS?'$'+(v>=100?Math.round(v):v.toFixed(1)):'$'+CMP.format(v);
+  const mm=f=>{const[y,m]=f.split('-');return m+'/'+y.slice(2)};
+  let g=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Precios de compra de ${esc(s)}">`;
+  for(let i=0;i<=3;i++){const v=lo+(hi-lo)*i/3,y=Y(v);g+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${L-6}" y="${y+3}" text-anchor="end">${yl(v)}</text>`}
+  if(cur)g+=`<line x1="${L}" x2="${W-R}" y1="${Y(cur)}" y2="${Y(cur)}" stroke="var(--up)" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+  g+=`<polyline fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" points="${pts.map(p=>X(p.d)+','+Y(p.avg)).join(' ')}"/>`;
+  pts.forEach(p=>{g+=`<circle cx="${X(p.d)}" cy="${Y(p.p)}" r="4" fill="var(--crypto)" stroke="var(--surface)" stroke-width="1.5"><title>${fdate(p.f)}: ${isS?fu(p.p):fc(p.p)}</title></circle>`});
+  g+=`<text x="${L}" y="${H-6}">${mm(pts[0].f)}</text><text x="${W-R}" y="${H-6}" text-anchor="end">${mm(pts[pts.length-1].f)}</text></svg>`;
+  return `<div class="pchart">${g}<div class="pleg"><span><i style="border-color:var(--crypto);border-top-width:8px;width:8px;border-radius:4px"></i>Precio de cada compra</span><span><i style="border-color:var(--accent)"></i>Costo promedio</span>${cur?'<span><i style="border-color:var(--up);border-top-style:dashed"></i>Precio actual</span>':''}</div></div>`;
+}
+
+// data menu: backup / restore
+$('#menuBtn').onclick=()=>open(`<h3>Tus datos</h3>
+  <p class="note" style="margin:0">Todo se guarda solo en este teléfono. Haz un respaldo de vez en cuando y guárdalo en Archivos o mándatelo por correo.</p>
+  <button class="primary" id="xExp">Exportar respaldo</button>
+  <label class="primary" style="display:block;text-align:center;background:var(--surface);color:var(--accent);border:1px solid var(--line)">Importar respaldo<input type="file" id="xImp" accept=".json,application/json" hidden></label>
+  <p class="note">Importar reemplaza los datos actuales de la app.</p>`,()=>{
+  $('#xExp').onclick=async()=>{const name='inversiones-respaldo-'+today()+'.json',blob=new Blob([JSON.stringify(S)],{type:'application/json'});
+    try{const f=new File([blob],name,{type:'application/json'});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:name});return}}catch(e){if(e&&e.name==='AbortError')return}
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove()};
+  $('#xImp').onchange=async e=>{const f=e.target.files[0];if(!f)return;
+    try{const d=JSON.parse(await f.text());if(!d.stocks||!d.crypto||!d.prices)throw 0;
+      if(!confirm('¿Reemplazar los datos actuales con este respaldo?'))return;
+      S={stocks:{buys:[]},deposits:{items:[]},crypto:{buys:[],sales:[]},prices:{usd:950,venta:0.015,stocks:{},crypto:{},nombres:{}},...d};
+      save();close();$('#banner').innerHTML='';render();toast('Respaldo cargado')}catch(err){toast('Ese archivo no es un respaldo válido')}};
+});
+
+// add movement
+$('#tAdd').onclick=()=>open(`<h3>Registrar</h3>
+  <div class="seg" role="group" id="aSeg" style="margin:12px 0 4px">
+    <button data-k="s" aria-pressed="true">Acción</button>
+    <button data-k="d" aria-pressed="false">Depósito</button>
+    <button data-k="c" aria-pressed="false">Cripto</button>
+    <button data-k="v" aria-pressed="false">Vender</button>
+  </div><div id="aForm"></div>`,()=>{segs('#aSeg',form);form('s')});
+
+function siglaOpts(list){return [...new Set(list)].sort().map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join('')+'<option value="__new">Otra…</option>'}
+function form(k){
+  const F=$('#aForm');
+  if(k==='s'){
+    F.innerHTML=`<div class="row2"><div><label class="f" for="fS">Acción</label><select class="field" id="fS">${siglaOpts([...Object.keys(S.prices.stocks||{}),...(S.stocks.buys||[]).map(b=>b.sigla)])}</select></div>
+      <div><label class="f" for="fD">Fecha</label><input class="field" id="fD" type="date" value="${today()}"></div></div>
+      <div id="fNewW" hidden class="row2"><div><label class="f" for="fNew">Sigla</label><input class="field" id="fNew" autocapitalize="characters" placeholder="Ej: MSFT"></div><div><label class="f" for="fNom">Nombre</label><input class="field" id="fNom" autocapitalize="characters" placeholder="Ej: Microsoft"></div></div>
+      <div class="row2"><div><label class="f" for="fM">Monto (US$)</label><input class="field" id="fM" inputmode="decimal" placeholder="0"></div>
+      <div><label class="f" for="fP">Precio por acción (US$)</label><input class="field" id="fP" inputmode="decimal" placeholder="0"></div></div>
+      <div class="calc" id="fCalc">Completa monto y precio.</div>
+      <button class="primary" id="fOk" disabled>Guardar compra</button>`;
+    const upd=()=>{const m=parse($('#fM').value),p=parse($('#fP').value);$('#fOk').disabled=!(m&&p);$('#fCalc').innerHTML=m&&p?`Compras <b>${num(m/p,6)}</b> acciones`:'Completa monto y precio.'};
+    $('#fS').onchange=()=>{$('#fNewW').hidden=$('#fS').value!=='__new';const cur=S.prices.stocks[$('#fS').value];if(cur&&!$('#fP').value)$('#fP').value=num(cur,2);upd()};
+    $('#fM').oninput=upd;$('#fP').oninput=upd;$('#fS').onchange();
+    $('#fOk').onclick=()=>{let s=$('#fS').value;if(s==='__new'){s=$('#fNew').value.trim().toUpperCase();if(!s){$('#fNew').focus();return}const n=$('#fNom').value.trim().toUpperCase();if(n){S.prices.nombres=S.prices.nombres||{};S.prices.nombres[s]=n}}
+      const m=parse($('#fM').value),p=parse($('#fP').value);
+      S.stocks.buys=[{id:uid36(),usd:m,fecha:$('#fD').value,sigla:s,nombre:S.prices.nombres?.[s]||s,precio:p,acc:m/p},...(S.stocks.buys||[])];
+      if(!S.prices.stocks[s])S.prices.stocks[s]=p;
+      save('stocks');save('prices');close();render();toast('Compra de '+s+' guardada')};
+  }else if(k==='d'){
+    F.innerHTML=`<p class="note" style="margin:10px 0 0">Pesos que pasaste a dólares para comprar acciones.</p>
+      <div class="row2"><div><label class="f" for="fM">Monto (CLP)</label><input class="field" id="fM" inputmode="numeric" placeholder="0"></div>
+      <div><label class="f" for="fD">Fecha</label><input class="field" id="fD" type="date" value="${today()}"></div></div>
+      <label class="f" for="fT">Dólar pagado (CLP)</label><input class="field" id="fT" inputmode="decimal" value="${num(S.prices.usd,2)}">
+      <div class="calc" id="fCalc"></div>
+      <button class="primary" id="fOk" disabled>Guardar depósito</button>`;
+    const upd=()=>{const m=parse($('#fM').value),t=parse($('#fT').value);$('#fOk').disabled=!(m&&t);$('#fCalc').innerHTML=m&&t?`Recibes <b>${fu(m/t)}</b>`:'Completa monto y dólar.'};
+    $('#fM').oninput=upd;$('#fT').oninput=upd;upd();
+    $('#fOk').onclick=()=>{S.deposits.items=[{id:uid36(),clp:Math.round(parse($('#fM').value)),fecha:$('#fD').value,tc:parse($('#fT').value)},...(S.deposits.items||[])];save('deposits');close();render();toast('Depósito guardado')};
+  }else if(k==='v'){
+    const H=calc().cRows;
+    if(!H.length){F.innerHTML='<div class="empty">No tienes cripto para vender.</div>';return}
+    F.innerHTML=`<p class="note" style="margin:10px 0 0">Las unidades vendidas se restan de tu posición y la ganancia queda registrada aparte.</p>
+      <div class="row2"><div><label class="f" for="fS">Moneda</label><select class="field" id="fS">${H.map(r=>`<option value="${esc(r.sigla)}">${esc(r.sigla)}</option>`).join('')}</select></div>
+      <div><label class="f" for="fD">Fecha</label><input class="field" id="fD" type="date" value="${today()}"></div></div>
+      <div class="row2"><div><label class="f" for="fU">Unidades vendidas</label><input class="field" id="fU" inputmode="decimal" placeholder="0"></div>
+      <div><label class="f" for="fP">Precio de venta (CLP)</label><input class="field" id="fP" inputmode="decimal" placeholder="0"></div></div>
+      <p class="note" id="fHave"></p>
+      <div class="row2"><div><label class="f" for="fCo">Comisión %</label><input class="field" id="fCo" inputmode="decimal" value="${num((+S.prices.venta||0)*100,2)}"></div>
+      <div><label class="f" for="fL">Dónde</label><input class="field" id="fL" autocapitalize="characters" value="MERCADO PAGO"></div></div>
+      <div class="calc" id="fCalc"></div>
+      <button class="primary" id="fOk" disabled>Guardar venta</button>`;
+    const pos=()=>H.find(r=>r.sigla===$('#fS').value);
+    const upd=()=>{const r=pos(),u=parse($('#fU').value),p=parse($('#fP').value),co=parse($('#fCo').value)/100,over=u>r.unid*(1+1e-9);
+      $('#fOk').disabled=!(u&&p)||over;
+      if(!(u&&p)){$('#fCalc').textContent='Completa unidades y precio.';return}
+      if(over){$('#fCalc').textContent='Estás vendiendo más de lo que tienes.';return}
+      const neto=u*p*(1-co),c=r.inv/r.unid*u,g=neto-c;
+      $('#fCalc').innerHTML=`Recibes <b>${fc(neto)}</b> · te costó ${fc(c)}<br>Ganancia: <b class="${g>=0?'up':'down'}">${g>=0?'+':'−'}${fc(Math.abs(g))}</b>`};
+    $('#fS').onchange=()=>{const r=pos();$('#fHave').innerHTML=`Tienes ${num(r.unid,8)} ${esc(r.sigla)} · <button type="button" id="fAll" style="border:0;background:none;color:var(--accent);font-weight:600;padding:0">Vender todo</button>`;
+      $('#fAll').onclick=()=>{$('#fU').value=num(r.unid,8);upd()};$('#fP').value=num(S.prices.crypto[r.sigla],2);upd()};
+    ['#fU','#fP','#fCo'].forEach(s=>$(s).oninput=upd);$('#fS').onchange();
+    $('#fOk').onclick=()=>{const s=$('#fS').value,u=parse($('#fU').value),p=parse($('#fP').value),co=parse($('#fCo').value)/100;
+      S.crypto.sales=[{id:uid36(),fecha:$('#fD').value,sigla:s,unid:u,precio:p,com:Math.round(u*p*co),neto:Math.round(u*p*(1-co)),lugar:$('#fL').value.trim().toUpperCase()},...(S.crypto.sales||[])];
+      save('crypto');close();render();toast('Venta de '+s+' guardada')};
+  }else{
+    F.innerHTML=`<div class="row2"><div><label class="f" for="fS">Moneda</label><select class="field" id="fS">${siglaOpts([...Object.keys(S.prices.crypto||{}),...(S.crypto.buys||[]).map(b=>b.sigla)])}</select></div>
+      <div><label class="f" for="fD">Fecha</label><input class="field" id="fD" type="date" value="${today()}"></div></div>
+      <div id="fNewW" hidden><label class="f" for="fNew">Sigla</label><input class="field" id="fNew" autocapitalize="characters" placeholder="Ej: SOL"></div>
+      <div class="row2"><div><label class="f" for="fM">Inversión (CLP)</label><input class="field" id="fM" inputmode="numeric" placeholder="0"></div>
+      <div><label class="f" for="fP">Precio (CLP)</label><input class="field" id="fP" inputmode="decimal" placeholder="0"></div></div>
+      <div class="row2"><div><label class="f" for="fCo">Comisión %</label><input class="field" id="fCo" inputmode="decimal" value="1,5"></div>
+      <div><label class="f" for="fL">Dónde</label><input class="field" id="fL" autocapitalize="characters" value="MERCADO PAGO"></div></div>
+      <div class="calc" id="fCalc"></div>
+      <button class="primary" id="fOk" disabled>Guardar compra</button>`;
+    const upd=()=>{const m=parse($('#fM').value),p=parse($('#fP').value),co=parse($('#fCo').value)/100;$('#fOk').disabled=!(m&&p);
+      $('#fCalc').innerHTML=m&&p?`Comisión ${fc(m*co)} · recibes <b>${num(m*(1-co)/p,6)}</b>`:'Completa inversión y precio.'};
+    $('#fS').onchange=()=>{$('#fNewW').hidden=$('#fS').value!=='__new';const cur=S.prices.crypto[$('#fS').value];if(cur&&!$('#fP').value)$('#fP').value=num(cur,2);upd()};
+    ['#fM','#fP','#fCo'].forEach(s=>$(s).oninput=upd);$('#fS').onchange();
+    $('#fOk').onclick=()=>{let s=$('#fS').value;if(s==='__new'){s=$('#fNew').value.trim().toUpperCase();if(!s){$('#fNew').focus();return}}
+      const m=Math.round(parse($('#fM').value)),p=parse($('#fP').value),co=parse($('#fCo').value)/100;
+      S.crypto.buys=[{id:uid36(),inv:m,com:Math.round(m*co),fecha:$('#fD').value,lugar:$('#fL').value.trim().toUpperCase(),sigla:s,precio:p,unid:m*(1-co)/p},...(S.crypto.buys||[])];
+      if(!S.prices.crypto[s])S.prices.crypto[s]=p;
+      save('crypto');save('prices');close();render();toast('Compra de '+s+' guardada')};
+  }
+}
+
+init();
+})();
+</script>
+</body>
+</html>
